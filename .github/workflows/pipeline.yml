@@ -115,4 +115,6 @@ jobs:
         with:
           # Reforça a branch nos argumentos da execução
           args: >
+            -Dsonar.projecKey=Restaurante-Tiago-Pereira
+            -Dsonar.projectName="Restaurante Tiago Pereira"
             -Dsonar.branch.name=${{ github.ref_name }}
