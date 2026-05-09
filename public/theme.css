@@ -1,0 +1,46 @@
+/* Theme variables and base styles */
+:root{
+  --bg: #ffffff;
+  --text: #0b1320;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #0077ff; /* vibrant blue */
+  --border: rgba(0,0,0,0.08);
+}
+
+[data-theme="dark"]{
+  --bg: #0f1720; /* cool dark */
+  --text: #e6eef6;
+  --card: #0b1220;
+  --muted: #97a6b2;
+  --accent: #00b4d8; /* cold cyan */
+  --border: rgba(255,255,255,0.04);
+}
+
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;}
+
+/* Common layout */
+.container{padding:20px}
+
+/* Cards and forms */
+.card, .login-card{background:var(--card);border:1px solid var(--border);padding:15px;border-radius:12px}
+.login-card{max-width:360px;margin:0 auto;padding:32px;box-shadow:0 8px 20px rgba(2,6,23,0.5)}
+h2{color:var(--accent);margin:0 0 12px}
+.input, input, select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);box-sizing:border-box}
+.button, button{background:var(--accent);color:var(--card);padding:10px 12px;border-radius:8px;border:none;cursor:pointer}
+.button:hover, button:hover{opacity:0.95;transform:translateY(-1px)}
+
+/* Dashboard specifics */
+.grid{display:flex;gap:20px}
+.card{width:300px}
+.kanban{display:flex;gap:16px;margin-top:16px}
+.column{flex:1;background:var(--card);padding:10px;border-radius:8px;min-height:150px;border:1px solid var(--border)}
+.card-order{background:var(--card);padding:8px;border-radius:6px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.form-inline{display:flex;gap:8px;align-items:center}
+
+/* Theme toggle button */
+.theme-toggle{background:transparent;border:1px solid var(--border);color:var(--accent);padding:6px 10px;border-radius:8px;cursor:pointer}
+.theme-toggle:hover{opacity:0.9}
+
+/* Small utilities */
+.text-muted{color:var(--muted)}
