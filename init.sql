@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_name VARCHAR(100),
     item_id INT,
     status VARCHAR(20) DEFAULT 'Aberto',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE SET NULL
 );
 
