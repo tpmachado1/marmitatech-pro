@@ -18,7 +18,7 @@ services:
       retries: 10
 
   app:
-    build: .
+    image: tpmachado1/marmitatech-pro:latest
     container_name: marmitatech-app
     ports:
       - "3000:3000"
