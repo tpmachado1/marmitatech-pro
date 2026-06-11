@@ -35,6 +35,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Serve static assets from the public directory (CSS, JS, images)
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.get('/', (req, res) => res.render('login'));
 
 app.post('/login', async (req, res) => {
