@@ -75,10 +75,14 @@
                                 <% cols[status].forEach(order => { %>
                                     <div class="card-order">
                                         <p><strong>#<%= order.id %></strong> - <%= order.customer_name %></p>
-                                        <p><em><%= order.item_name || '—' %></em></p>
+                                        <p><em><%= order.item_name ? (order.item_name + (order.item_category ? ' ('+order.item_category+')' : '')) : '—' %></em></p>
                                         <% if (status !== 'Entregue') { %>
                                             <form action="/orders/<%= order.id %>/advance" method="POST">
                                                 <button type="submit" class="button">Avançar</button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/orders/<%= order.id %>/delete" method="POST" onsubmit="return confirm('Excluir pedido concluído?');">
+                                                <button type="submit" class="button" style="background:#ff4d4f;color:white">Excluir</button>
                                             </form>
                                         <% } %>
                                     </div>

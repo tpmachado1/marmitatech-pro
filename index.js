@@ -90,15 +90,20 @@ app.post('/login', async (req, res) => {
 
 app.get('/dashboard', async (req, res) => {
     const [items] = await pool.query('SELECT * FROM items');
-    const [orders] = await pool.query('SELECT * FROM orders');
+    const [orders] = await pool.query(
+        `SELECT o.*, i.name AS item_name, i.category AS item_category
+         FROM orders o
+         LEFT JOIN items i ON o.item_id = i.id
+         ORDER BY o.id DESC`
+    );
     res.render('dashboard', { items, orders });
 });
 
 // Create a new order
 app.post('/orders', async (req, res) => {
-    const { customer_name } = req.body;
+    const { customer_name, item_id } = req.body;
     try {
-        await pool.query('INSERT INTO orders (customer_name, status) VALUES (?, ?)', [customer_name, 'Aberto']);
+        await pool.query('INSERT INTO orders (customer_name, item_id, status) VALUES (?, ?, ?)', [customer_name, item_id || null, 'Aberto']);
         res.redirect('/dashboard');
     } catch (err) {
         console.error('[ORDERS] create error:', err);
@@ -121,6 +126,18 @@ app.post('/orders/:id/advance', async (req, res) => {
     } catch (err) {
         console.error('[ORDERS] advance error:', err);
         res.status(500).send('Erro ao avançar pedido');
+    }
+});
+
+// Delete an order (used for delivered orders)
+app.post('/orders/:id/delete', async (req, res) => {
+    const id = req.params.id;
+    try {
+        await pool.query('DELETE FROM orders WHERE id = ?', [id]);
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error('[ORDERS] delete error:', err);
+        res.status(500).send('Erro ao excluir pedido');
     }
 });
 
