@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MarmitaTech - Dashboard</title>
-    <link rel="stylesheet" href="/theme.css">
+        <title>MarmitaTech - Dashboard</title>
+        <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
-    <h1>Painel Administrativo - MarmitaTech</h1>
-    <div class="grid">
-        <div class="card">
-            <h3>Novo Item (Ingrediente)</h3>
-            <form action="/add-item" method="POST">
-                <input type="text" name="name" placeholder="Nome (Ex: Batata Doce)" required><br><br>
-                <input type="text" name="category" placeholder="Categoria (Ex: Carboidrato)"><br><br>
-                <button type="submit">Cadastrar Item</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h3>Itens Cadastrados</h3>
-            <ul>
-                <% items.forEach(item => { %>
-                    <li><%= item.name %> (<%= item.category %>)</li>
-                <% }) %>
-            </ul>
-        </div>
+    <div class="topbar">
+        <div class="brand"><div class="logo">MarmitaTech</div></div>
+        <div class="search"><input placeholder="Pesquisar..."><button class="button">Buscar</button></div>
+        <div class="actions"></div>
     </div>
-
-    <hr>
-    <h2>📦 Pedidos Ativos</h2>
-    <p><i>Aqui será implementado o Kanban nas próximas aulas...</i></p>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="nav-item active">Início</div>
+            <div class="nav-item">Pedidos</div>
+            <div class="nav-item">Itens</div>
+        </aside>
+        <main class="main">
+            <div class="container">
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Novo Item (Ingrediente)</h3>
+                        <form action="/add-item" method="POST">
+                            <input type="text" name="name" placeholder="Nome (Ex: Batata Doce)" required>
+                            <input type="text" name="category" placeholder="Categoria (Ex: Carboidrato)">
+                            <button type="submit" class="button">Cadastrar Item</button>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <h3>Itens Cadastrados</h3>
+                        <ul>
+                            <% items.forEach(item => { %>
+                                <li><%= item.name %> (<%= item.category %>)</li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

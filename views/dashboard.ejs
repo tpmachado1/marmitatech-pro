@@ -1,33 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MarmitaTech - Dashboard</title>
-    <link rel="stylesheet" href="/theme.css">
+        <meta charset="UTF-8">
+        <title>MarmitaTech - Dashboard</title>
+        <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
-    <h1>Painel Administrativo - MarmitaTech</h1>
-    <div class="grid">
-        <div class="card">
-            <h3>Novo Item (Ingrediente)</h3>
-            <form action="/add-item" method="POST">
-                <input type="text" name="name" placeholder="Nome (Ex: Batata Doce)" required><br><br>
-                <input type="text" name="category" placeholder="Categoria (Ex: Carboidrato)"><br><br>
-                <button type="submit">Cadastrar Item</button>
-            </form>
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo">MarmitaTech</div>
         </div>
-
-        <div class="card">
-            <h3>Itens Cadastrados</h3>
-            <ul>
-                <% items.forEach(item => { %>
-                    <li><%= item.name %> (<%= item.category %>)</li>
-                <% }) %>
-            </ul>
+        <div class="search">
+            <input placeholder="Pesquisar pedidos, itens..." aria-label="Pesquisar">
+            <button class="button">Buscar</button>
+        </div>
+        <div class="actions">
+            <a href="/admin/export" class="download-report">Baixar Relatório</a>
         </div>
     </div>
 
-    <hr>
-    <h2>📦 Pedidos Ativos</h2>
-    <p><i>Aqui será implementado o Kanban nas próximas aulas...</i></p>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="nav-item active">Início</div>
+            <div class="nav-item">Pedidos</div>
+            <div class="nav-item">Itens</div>
+            <div class="nav-item">Relatórios</div>
+        </aside>
+
+        <main class="main">
+            <div class="container">
+                <div class="content-grid">
+                    <div class="card">
+                        <h3>Novo Item (Ingrediente)</h3>
+                        <form action="/add-item" method="POST" class="form-inline">
+                            <input type="text" name="name" placeholder="Nome (Ex: Batata Doce)" required>
+                            <input type="text" name="category" placeholder="Categoria (Ex: Carboidrato)">
+                            <input type="number" step="0.01" name="price" placeholder="Preço (Ex: 12.50)" required>
+                            <button type="submit" class="button">Cadastrar Item</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3>Itens Cadastrados</h3>
+                        <ul>
+                            <% items.forEach(item => { %>
+                                <li><%= item.name %> (<%= item.category %>) - R$ <%= item.price %></li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                </div>
+
+                <section style="margin-top:18px">
+                    <h2>📦 Novo Pedido</h2>
+                    <form action="/orders" method="POST" class="form-inline">
+                        <input type="text" name="customer_name" placeholder="Nome do cliente" required>
+                        <select name="item_id" required>
+                            <% items.forEach(item => { %>
+                                <option value="<%= item.id %>"><%= item.name %> - R$ <%= item.price %></option>
+                            <% }) %>
+                        </select>
+                        <button type="submit" class="button">Criar Pedido</button>
+                    </form>
+                </section>
+
+                <section style="margin-top:18px">
+                    <h2>📋 Kanban da Cozinha</h2>
+                    <div class="kanban">
+                        <% const cols = { 'Aberto': [], 'Cozinha': [], 'Entrega': [], 'Entregue': [] }; %>
+                        <% orders.forEach(o => { cols[o.status] = cols[o.status] || []; cols[o.status].push(o); }); %>
+
+                        <% Object.keys(cols).forEach(status => { %>
+                            <div class="column">
+                                <h3><%= status %></h3>
+                                <% cols[status].forEach(order => { %>
+                                    <div class="card-order">
+                                        <p><strong>#<%= order.id %></strong> - <%= order.customer_name %></p>
+                                        <p><em><%= order.item_name || '—' %></em></p>
+                                        <% if (status !== 'Entregue') { %>
+                                            <form action="/orders/<%= order.id %>/advance" method="POST">
+                                                <button type="submit" class="button">Avançar</button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% }) %>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/theme-toggle.js" defer></script>
 </body>
 </html>
