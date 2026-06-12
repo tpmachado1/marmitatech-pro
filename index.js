@@ -94,6 +94,36 @@ app.get('/dashboard', async (req, res) => {
     res.render('dashboard', { items, orders });
 });
 
+// Create a new order
+app.post('/orders', async (req, res) => {
+    const { customer_name } = req.body;
+    try {
+        await pool.query('INSERT INTO orders (customer_name, status) VALUES (?, ?)', [customer_name, 'Aberto']);
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error('[ORDERS] create error:', err);
+        res.status(500).send('Erro ao criar pedido');
+    }
+});
+
+// Advance an order to the next status
+app.post('/orders/:id/advance', async (req, res) => {
+    const id = req.params.id;
+    const statuses = ['Aberto', 'Cozinha', 'Entrega', 'Entregue'];
+    try {
+        const [rows] = await pool.query('SELECT status FROM orders WHERE id = ?', [id]);
+        if (!rows || rows.length === 0) return res.status(404).send('Pedido não encontrado');
+        const current = rows[0].status || 'Aberto';
+        const idx = statuses.indexOf(current);
+        const nextStatus = (idx >= 0 && idx < statuses.length - 1) ? statuses[idx + 1] : current;
+        await pool.query('UPDATE orders SET status = ? WHERE id = ?', [nextStatus, id]);
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error('[ORDERS] advance error:', err);
+        res.status(500).send('Erro ao avançar pedido');
+    }
+});
+
 connectWithRetry().then(() => {
     app.listen(3000, () => console.log('🚀 MARMITATECH PRO ONLINE NA PORTA 3000'));
 });
