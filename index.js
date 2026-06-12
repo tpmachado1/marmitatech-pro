@@ -7,7 +7,8 @@ const path = require('path');
 const app = express();
 
 const dbConfig = {
-    host: process.env.DB_HOST || 'db',
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER || 'user',
     password: process.env.DB_PASS || 'password',
     database: process.env.DB_NAME || 'marmitadb'
@@ -17,17 +18,33 @@ let pool;
 
 async function connectWithRetry() {
     console.log('🔍 [INFRA] Tentando conectar ao MySQL...');
-    for (let i = 1; i <= 10; i++) {
+    const maxAttempts = 10;
+    for (let i = 1; i <= maxAttempts; i++) {
         try {
-            pool = mysql.createPool(dbConfig);
-            await pool.query('SELECT 1');
+            pool = mysql.createPool({
+                host: dbConfig.host,
+                port: dbConfig.port,
+                user: dbConfig.user,
+                password: dbConfig.password,
+                database: dbConfig.database,
+                waitForConnections: true,
+                connectionLimit: 10,
+                connectTimeout: 10000
+            });
+
+            // verify connection by getting and releasing a connection
+            const conn = await pool.getConnection();
+            await conn.ping();
+            conn.release();
+
             console.log('✅ [DATABASE] Conectado ao MySQL com sucesso!');
             return;
         } catch (err) {
-            console.log(`⚠️ [DATABASE] Tentativa ${i}/10 falhou. Aguardando...`);
-            await new Promise(res => setTimeout(res, 3000));
+            console.log(`⚠️ [DATABASE] Tentativa ${i}/${maxAttempts} falhou: ${err.message}`);
+            if (i < maxAttempts) await new Promise(res => setTimeout(res, 3000));
         }
     }
+    console.error('❌ [DATABASE] Não foi possível conectar ao MySQL após várias tentativas.');
     process.exit(1);
 }
 
