@@ -101,7 +101,9 @@ html,body{
 .card h3{margin:0 0 12px}
 .card ul{margin:0;padding-left:18px;color:var(--muted)}
 
-.column{background:var(--panel);padding:18px;border-radius:10px;border:1px solid var(--border);min-height:150px}
+.kanban{display:flex;gap:20px;align-items:flex-start;flex-wrap:nowrap;overflow-x:auto;margin-top:12px;padding-bottom:8px}
+
+.column{flex:1 0 260px;background:var(--panel);padding:18px;border-radius:10px;border:1px solid var(--border);min-height:150px;min-width:220px}
 .column h3{margin:0 0 12px;color:var(--text)}
 .card-order{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:16px;border-radius:8px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.03)}
 
