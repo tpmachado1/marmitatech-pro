@@ -27,6 +27,7 @@ async function connectWithRetry() {
                 user: dbConfig.user,
                 password: dbConfig.password,
                 database: dbConfig.database,
+                charset: 'utf8mb4_unicode_ci',
                 waitForConnections: true,
                 connectionLimit: 10,
                 connectTimeout: 10000
@@ -34,6 +35,8 @@ async function connectWithRetry() {
 
             // verify connection by getting and releasing a connection
             const conn = await pool.getConnection();
+            // ensure connection uses utf8mb4
+            await conn.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
             await conn.ping();
             conn.release();
 
