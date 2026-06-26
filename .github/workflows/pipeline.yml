@@ -81,7 +81,7 @@ jobs:
         run: npx eslint .
 
   job_sonar:
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
     needs: estagio_lint
     runs-on: ubuntu-latest
     steps:
@@ -114,7 +114,7 @@ jobs:
             -Dsonar.sourceEncoding=UTF-8
 
   job_release_docker:
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
     needs: estagio_lint
     runs-on: ubuntu-latest
     steps:
@@ -135,7 +135,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/marmitatech-pro:latest
 
   job_trivy_sonar:
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
     needs: job_release_docker
     runs-on: ubuntu-latest
     steps:
@@ -159,7 +159,7 @@ jobs:
         run: echo "Trivy report generated at trivy-results.json"
 
   job_deploy_staging:
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
     needs: job_trivy_sonar
     runs-on: ubuntu-latest
     steps:
