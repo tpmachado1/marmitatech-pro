@@ -19,14 +19,17 @@ services:
 
   app:
     build: .
+    image: marmitatech-pro-app:latest
     container_name: marmitatech-app
     ports:
-      - "3000:3000"
+    - "8094:3000"
     environment:
       DB_HOST: db
+      DB_PORT: 3306
       DB_USER: user
       DB_PASS: password
       DB_NAME: marmitadb
     depends_on:
       db:
         condition: service_healthy
+    
