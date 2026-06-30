@@ -19,7 +19,7 @@ services:
 
   app:
     build: .
-    image: marmitatech-pro-app:latest
+    image: tpmachado/marmitatech-pro-app:latest
     container_name: marmitatech-app
     ports:
     - "8094:3000"

@@ -13,20 +13,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout do código
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
-      - uses: sonarsource/sonarqube-scan-action@master
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Verificar sintaxe JavaScript
+        run: |
+          find . -type f -name "*.js" \
+            ! -path "./node_modules/*" \
+            ! -path "./.git/*" \
+            ! -path "./dist/*" \
+            -exec node --check {} \;
+
+      - name: Rodar lint básico
+        run: |
+          npm install --no-save eslint globals
+          cat > eslint.config.js <<'EOF'
+          const globals = require("globals");
+          module.exports = [{
+            files: ["**/*.js"],
+            ignores: ["node_modules/**", ".git/**", "dist/**"],
+            languageOptions: {
+              ecmaVersion: 2021,
+              sourceType: "commonjs",
+              globals: { ...globals.node, ...globals.commonjs }
+            },
+            rules: { "no-unused-vars": "warn", "no-undef": "error" }
+          }];
+          EOF
+          npx eslint .
+
+      - name: SonarQube Scan
+        if: ${{ secrets.SONAR_TOKEN != '' }}
+        uses: sonarsource/sonarqube-scan-action@v2.3.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # We do not recommend to use this in a pull request. Prefer using pull request
-      # decoration instead.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL || 'https://devsecops.dcotech.com.br' }}
