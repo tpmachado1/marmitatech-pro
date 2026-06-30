@@ -1,12 +1,13 @@
-name: integracao continua
+name: integracao continua e staging
 
 on:
   push:
-    branches: ["develop"]
-  pull_request:
-    branches: ["develop"]
+    branches: ["staging"]
 
 jobs:
+  # ==========================================
+  # ETAPAS EXISTENTES (Completas)
+  # ==========================================
   estagio_build:
     runs-on: ubuntu-latest
     steps:
@@ -85,22 +86,20 @@ jobs:
 
   job_sonar:
     needs: estagio_lint
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Essencial para o Sonar ler o histórico de branches
+          fetch-depth: 0
 
       - name: Criar sonar-project.properties dinâmico
         run: |
-          # Define o nome do repo e a branch dinamicamente
           echo "sonar.projectKey=${{ github.event.repository.name }}" > sonar-project.properties
           echo "sonar.projectName=${{ github.event.repository.name }}" >> sonar-project.properties
           echo "sonar.branch.name=${{ github.ref_name }}" >> sonar-project.properties
           echo "sonar.sources=." >> sonar-project.properties
-          echo "sonar.inclusions=**/*.js" >> sonar-project.properties
           echo "sonar.sourceEncoding=UTF-8" >> sonar-project.properties
           echo "sonar.exclusions=node_modules/**,.git/**,.github/**,coverage/**,dist/**" >> sonar-project.properties
 
@@ -113,8 +112,78 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: "https://devsecops.dcotech.com.br"
         with:
-          # Reforça a branch nos argumentos da execução
           args: >
-            -Dsonar.projecKey=Restaurante-Tiago-Pereira
-            -Dsonar.projectName="Restaurante Tiago Pereira"
             -Dsonar.branch.name=${{ github.ref_name }}
+
+  # ==========================================
+  # ETAPAS DE STAGING
+  # ==========================================
+
+  job_release_docker:
+    needs: estagio_lint
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: TO DO - Checkout do código
+        run: echo "Você deve implementar o checkout aqui"
+
+      - name: TO DO - Login no Registry
+        run: echo "Você deve implementar o login do Docker aqui"
+
+      - name: TO DO - Build e Push da Imagem
+        run: echo "Você deve implementar a criação do artefato (imagem) e o envio pro registry aqui"
+
+  job_trivy_sonar:
+    needs: job_release_docker
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: TO DO - Checkout do código para o Sonar
+        run: echo "Você deve implementar o checkout com fetch-depth 0 aqui"
+
+      - name: TO DO - Scan de Segurança com Trivy
+        run: echo "Você deve implementar a varredura do Trivy gerando o arquivo JSON aqui"
+
+      - name: TO DO - SonarQube lendo o Trivy (External Issues)
+        run: echo "Você deve implementar o passo do Sonar injetando o JSON do Trivy aqui"
+
+  job_deploy_staging:
+    needs: job_trivy_sonar
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Preparar arquivo Compose com o identificador do aluno
+        run: |
+          cp docker-compose.yml docker-compose-<aluno>.yml
+
+      - name: Copiar Compose e init.sql para a EC2 (via SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "docker-compose-<aluno>.yml,init.sql"
+          target: "/home/${{ secrets.EC2_USER }}/<pastaaluno>"
+
+      - name: Executar o Deploy na EC2 (via SSH)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd /home/${{ secrets.EC2_USER }}/<pastaaluno>
+
+            echo "⏳ Executando init.sql no container mysql-infra..."
+            sudo docker exec -i mysql-infra \
+              mysql -u root -ppassword < init.sql
+
+            echo "✅ init.sql executado com sucesso!"
+
+            sudo docker compose -f docker-compose-<aluno>.yml pull
+            sudo docker compose -f docker-compose-<aluno>.yml up -d
+
+            echo "✅ Deploy do aluno finalizado com sucesso!"
