@@ -86,7 +86,7 @@ jobs:
 
   job_sonar:
     needs: estagio_lint
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
@@ -121,7 +121,7 @@ jobs:
 
   job_release_docker:
     needs: estagio_lint
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
@@ -142,7 +142,7 @@ jobs:
 
   job_trivy_sonar:
     needs: job_release_docker
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código para o Sonar
@@ -171,7 +171,7 @@ jobs:
 
   job_deploy_staging:
     needs: job_trivy_sonar
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
