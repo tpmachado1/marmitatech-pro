@@ -2,7 +2,7 @@ name: integracao continua e staging
 
 on:
   push:
-    branches: ["staging"]
+    branches: ["staging", "develop"]
 
 jobs:
   # ==========================================
@@ -12,13 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Configurar Node.js 18
-        uses: actions/setup-node@v4
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v5
         with:
-          node-version: "18"
-          package-manager-cache: false
+          node-version: "20"
 
       - name: Gerar lockfile temporário
         run: npm install --package-lock-only
@@ -39,13 +38,12 @@ jobs:
     needs: estagio_build
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Configurar Node.js 18
-        uses: actions/setup-node@v4
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v5
         with:
-          node-version: "18"
-          package-manager-cache: false
+          node-version: "20"
 
       - name: Gerar lockfile temporário
         run: npm install --package-lock-only
@@ -86,11 +84,11 @@ jobs:
 
   job_sonar:
     needs: estagio_lint
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -121,7 +119,7 @@ jobs:
 
   job_release_docker:
     needs: estagio_lint
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: TO DO - Checkout do código
@@ -135,7 +133,7 @@ jobs:
 
   job_trivy_sonar:
     needs: job_release_docker
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: TO DO - Checkout do código para o Sonar
@@ -149,11 +147,11 @@ jobs:
 
   job_deploy_staging:
     needs: job_trivy_sonar
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref_name == 'staging' || github.ref_name == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Preparar arquivo Compose com o identificador do aluno
         run: |
